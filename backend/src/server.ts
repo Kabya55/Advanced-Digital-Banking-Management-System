@@ -69,16 +69,9 @@ app.get('/', (req, res) => {
 </head>
 <body>
   <div class="card">
-    <div class="badge"><span class="dot"></span> Backend API Server is Running</div>
-    <h1>Apex Bank API Server (Port 5050)</h1>
+    <div class="badge"><span class="dot"></span> Apex Bank API Server Running</div>
     <p>This is the REST API backend server. To view and use the <strong>Digital Banking Web Application UI</strong> (login, dashboards, transfers, loans), open the frontend in your browser:</p>
-    <a href="http://localhost:3000" class="btn">🚀 Open Banking Web App (localhost:3000)</a>
-    <div class="info">
-      <div><strong>Status:</strong> Online (200 OK)</div>
-      <div><strong>API Root:</strong> /api</div>
-      <div><strong>Health:</strong> /api/health</div>
-      <div><strong>Database:</strong> MongoDB Atlas Connected</div>
-    </div>
+    <a href="https://frontend-moqyp7s5h-kabya-kishor-halders-projects.vercel.app" class="btn">🚀 Open Banking Web App (Click)</a>
   </div>
 </body>
 </html>`);
@@ -89,8 +82,8 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     port: PORT,
     documentation: 'Access API endpoints via /api (e.g. /api/health)',
-    frontendUrl: 'http://localhost:3000',
-    message: 'Backend API is running smoothly. Please open http://localhost:3000 in your browser to access the Digital Banking Web Application.',
+    frontendUrl: 'https://frontend-moqyp7s5h-kabya-kishor-halders-projects.vercel.app',
+    message: 'Backend API is running smoothly. Please open https://frontend-moqyp7s5h-kabya-kishor-halders-projects.vercel.app in your browser to access the Digital Banking Web Application.',
   });
 });
 
