@@ -44,7 +44,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint
+// Root and Health check endpoints
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    system: 'Apex Bank - Backend API Server',
+    version: '1.0.0',
+    documentation: 'Access API endpoints via /api (e.g. /api/health)',
+    frontendUrl: 'http://localhost:3000',
+    message: 'Backend API is running smoothly. Please open http://localhost:3000 in your browser to access the Digital Banking Web Application.',
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
