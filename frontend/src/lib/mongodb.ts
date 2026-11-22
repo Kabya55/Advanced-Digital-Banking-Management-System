@@ -1,13 +1,9 @@
 import mongoose from 'mongoose';
-import dns from 'dns';
-
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
 
 const MONGODB_URI =
   process.env.MONGODB_URI ||
   'mongodb+srv://Advanced-Digital-Banking-Management-System:znrlms2yyw524Puy@cluster0.l46db0x.mongodb.net/banking_system?retryWrites=true&w=majority&appName=Cluster0';
+
 
 interface MongooseCache {
   conn: typeof mongoose | null;
