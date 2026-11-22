@@ -103,6 +103,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Database connection middleware for serverless invocations
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Mount API routes
 app.use('/api', routes);
 
@@ -115,15 +125,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
-// Connect to Database and start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`=======================================================`);
-    console.log(`🚀 Banking API Server running on port ${PORT}`);
-    console.log(`📡 URL: http://localhost:${PORT}`);
-    console.log(`🔐 CORS Enabled for frontend clients`);
-    console.log(`=======================================================`);
+// Connect to Database and start server for standalone/local mode
+if (!process.env.VERCEL) {
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`=======================================================`);
+      console.log(`🚀 Banking API Server running on port ${PORT}`);
+      console.log(`📡 URL: http://localhost:${PORT}`);
+      console.log(`🔐 CORS Enabled for frontend clients`);
+      console.log(`=======================================================`);
+    });
   });
-});
+}
 
 export default app;
