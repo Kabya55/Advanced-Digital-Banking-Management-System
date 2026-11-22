@@ -19,6 +19,7 @@ import {
   CheckCircle,
   AlertOctagon,
   FileCheck,
+  Home,
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -63,7 +64,17 @@ export default function Sidebar() {
       } flex flex-col justify-between border-r border-slate-800`}
     >
       <div className="flex-1 py-6 px-4 overflow-y-auto">
-        <div className="px-2 mb-6">
+        <div className="px-2 mb-4">
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 rounded-xl border border-slate-700/70 transition-all group shadow-sm"
+          >
+            <Home className="w-4 h-4 text-indigo-400 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Go to Home Page</span>
+          </Link>
+        </div>
+
+        <div className="px-2 mb-4">
           <p className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
             {role === 'admin'
               ? 'Administrator Portal'

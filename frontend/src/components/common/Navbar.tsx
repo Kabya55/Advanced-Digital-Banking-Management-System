@@ -15,6 +15,7 @@ import {
   KeyRound,
   ChevronDown,
   Building2,
+  Home,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -74,6 +75,16 @@ export default function Navbar() {
             FinTech Core
           </span>
         </div>
+
+        {/* Go to Home Button (Left Side Top) */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 ml-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 rounded-lg border border-slate-200 transition-all shadow-sm"
+          title="Return to Public Home Page"
+        >
+          <Home className="w-3.5 h-3.5 text-indigo-600" />
+          <span>Go to Home</span>
+        </Link>
       </div>
 
       <div className="flex items-center space-x-4">

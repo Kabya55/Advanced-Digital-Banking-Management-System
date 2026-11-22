@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLoginMutation } from '@/store/api/apiSlice';
-import { useAppDispatch } from '@/store/hooks';
-import { setCredentials } from '@/store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setCredentials, logout } from '@/store/slices/authSlice';
 import {
   Building2,
   ShieldCheck,
@@ -17,13 +17,23 @@ import {
   BarChart3,
   CheckCircle2,
   Sparkles,
+  LayoutDashboard,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function HomePage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const [login, { isLoading }] = useLoginMutation();
+
+  const getDashboardUrl = (role?: string) => {
+    if (role === 'admin') return '/admin/dashboard';
+    if (role === 'staff') return '/staff/dashboard';
+    return '/customer/dashboard';
+  };
 
   const handleQuickLogin = async (email: string, role: string) => {
     try {
@@ -60,24 +70,84 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <Link
-            href="/login"
-            className="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/register"
-            className="px-4 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
-          >
-            Open Account
-          </Link>
-        </div>
+        {/* Right side Auth Controls */}
+        {isAuthenticated && user ? (
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-2 text-right">
+              <div>
+                <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
+                <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-700/60">
+                  {user.role === 'admin'
+                    ? 'Admin'
+                    : user.role === 'staff'
+                    ? 'Bank Staff'
+                    : 'Customer'}
+                </span>
+              </div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-indigo-700 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-indigo-500/30">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            </div>
+
+            <Link
+              href={getDashboardUrl(user.role)}
+              className="px-4 py-2 text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-1.5"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Go to Dashboard</span>
+            </Link>
+
+            <button
+              onClick={() => {
+                dispatch(logout());
+                toast.success('Logged out successfully');
+              }}
+              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+              title="Sign Out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all"
+            >
+              Open Account
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-20 px-6 max-w-7xl mx-auto text-center">
+        {isAuthenticated && user && (
+          <div className="mb-8 max-w-lg mx-auto p-3.5 sm:p-4 rounded-2xl bg-indigo-950/70 border border-indigo-500/50 backdrop-blur-md flex items-center justify-between shadow-xl">
+            <div className="flex items-center space-x-3 text-left">
+              <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-white">Signed in as {user.name}</p>
+                <p className="text-[11px] text-indigo-300">{user.email} • {user.role.toUpperCase()} PORTAL</p>
+              </div>
+            </div>
+            <Link
+              href={getDashboardUrl(user.role)}
+              className="px-3.5 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition-all shadow-md flex items-center gap-1"
+            >
+              <span>Dashboard</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        )}
         <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-indigo-950/80 border border-indigo-800/60 text-xs font-semibold text-indigo-300 mb-6 animate-pulse">
           <Sparkles className="w-4 h-4 text-indigo-400" />
           <span>Next-Generation Digital Banking & Financial Core System</span>
