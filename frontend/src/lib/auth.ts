@@ -24,7 +24,7 @@ export async function getAuthUser(req: NextRequest): Promise<JWTPayloadData | nu
 
   await connectToDatabase();
   const dbUser = await User.findById(payload.userId).select('status isBlocked role');
-  if (!dbUser || dbUser.isBlocked || dbUser.status !== 'active') {
+  if (!dbUser || dbUser.isBlocked || dbUser.status === 'suspended' || dbUser.status === 'inactive') {
     return null;
   }
 

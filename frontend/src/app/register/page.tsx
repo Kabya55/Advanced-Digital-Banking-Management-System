@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useRegisterMutation } from '@/store/api/apiSlice';
+import { useRegisterMutation, bankingApi } from '@/store/api/apiSlice';
 import { useAppDispatch } from '@/store/hooks';
 import { setCredentials } from '@/store/slices/authSlice';
 import { Building2, User, Mail, Lock, Phone, MapPin, ArrowRight, Loader2, Sparkles } from 'lucide-react';
@@ -43,8 +43,13 @@ export default function RegisterPage() {
         address: address.trim(),
       }).unwrap();
 
+      dispatch(bankingApi.util.resetApiState());
       dispatch(setCredentials({ user: res.user, token: res.token }));
-      toast.success(res.message || 'Account created successfully!');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('bank_token', res.token);
+        document.cookie = `bank_auth_token=${res.token}; path=/; max-age=604800; SameSite=Lax;`;
+      }
+      toast.success(res.message || 'Account created successfully! Welcome to Apex Bank.');
       router.push('/customer/dashboard');
     } catch (err: any) {
       toast.error(err?.data?.error || err.message || 'Registration failed');

@@ -39,6 +39,16 @@ export default function DepositWithdrawModal({
       return;
     }
 
+    if (selectedAccount.status === 'pending') {
+      toast.error('Your account is pending admin approval. Deposit & withdrawal requests are locked.');
+      return;
+    }
+
+    if (selectedAccount.status !== 'active') {
+      toast.error(`This account is ${selectedAccount.status}. Requests are not permitted.`);
+      return;
+    }
+
     if (!numAmount || numAmount <= 0) {
       toast.error('Please enter a valid amount');
       return;
@@ -167,11 +177,21 @@ export default function DepositWithdrawModal({
           </div>
 
           <div className="pt-2">
+            {selectedAccount?.status === 'pending' && (
+              <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                <p className="font-bold text-amber-900">Account Pending Approval</p>
+                <p className="text-[11px] text-amber-700 mt-0.5">
+                  Transactions and requests are locked until your account is approved by bank staff.
+                </p>
+              </div>
+            )}
             <button
               type="submit"
-              disabled={isLoading}
-              className={`w-full flex items-center justify-center space-x-2 py-3 px-4 text-white rounded-xl text-sm font-semibold shadow-lg transition-all disabled:opacity-50 ${
-                type === 'deposit'
+              disabled={isLoading || selectedAccount?.status !== 'active'}
+              className={`w-full flex items-center justify-center space-x-2 py-3 px-4 text-white rounded-xl text-sm font-semibold shadow-lg transition-all ${
+                selectedAccount?.status !== 'active'
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                  : type === 'deposit'
                   ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
                   : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20'
               }`}
@@ -181,6 +201,8 @@ export default function DepositWithdrawModal({
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Submitting Request...</span>
                 </>
+              ) : selectedAccount?.status === 'pending' ? (
+                <span>Account Pending Approval (Locked)</span>
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4" />

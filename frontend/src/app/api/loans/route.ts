@@ -78,6 +78,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You do not own this bank account' }, { status: 403 });
     }
 
+    if (account.status !== 'active') {
+      return NextResponse.json(
+        { error: 'Cannot apply for a loan. Your account is pending verification or inactive.' },
+        { status: 403 }
+      );
+    }
+
     const interestRate = 8.5;
     const monthlyRate = interestRate / 100 / 12;
     const monthlyInstallment = Number(

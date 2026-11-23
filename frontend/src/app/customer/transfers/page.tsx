@@ -35,6 +35,8 @@ export default function CustomerTransfersPage() {
     limit: 10,
   });
 
+  const isPending = accounts.length > 0 && accounts.every((a) => a.status === 'pending');
+
   return (
     <DashboardLayout allowedRoles={['customer']}>
       <div className="space-y-6">
@@ -54,6 +56,18 @@ export default function CustomerTransfersPage() {
             <span>Make a Transfer</span>
           </button>
         </div>
+
+        {isPending && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="font-bold">⚠️ Account Pending Approval:</span>
+              <span>Your bank account is under review by Bank Staff. Outgoing transfers will be unlocked upon approval.</span>
+            </div>
+            <span className="px-2.5 py-1 bg-amber-200 text-amber-950 font-bold text-[10px] uppercase rounded-lg">
+              Pending Review
+            </span>
+          </div>
+        )}
 
         {/* Filter Bar */}
         <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">

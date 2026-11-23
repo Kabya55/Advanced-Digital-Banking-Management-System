@@ -63,6 +63,8 @@ export default function CustomerLoansPage() {
     }
   };
 
+  const isPending = accounts.length > 0 && accounts.every((a) => a.status === 'pending');
+
   return (
     <DashboardLayout allowedRoles={['customer']}>
       <div className="space-y-6">
@@ -84,6 +86,18 @@ export default function CustomerLoansPage() {
             <span>Apply for New Loan</span>
           </button>
         </div>
+
+        {isPending && (
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2.5">
+              <span className="font-bold">⚠️ Account Pending Approval:</span>
+              <span>Your account registration is under bank verification. Loan applications are locked until approved.</span>
+            </div>
+            <span className="px-2.5 py-1 bg-amber-200 text-amber-950 font-bold text-[10px] uppercase rounded-lg">
+              Pending Review
+            </span>
+          </div>
+        )}
 
         {/* Loans Overview Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

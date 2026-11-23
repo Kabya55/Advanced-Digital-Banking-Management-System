@@ -3,32 +3,107 @@
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/common/DashboardLayout';
 import StaffCustomerModal from '@/components/staff/StaffCustomerModal';
-import { useGetCustomersQuery, useGetCustomerByIdQuery } from '@/store/api/apiSlice';
-import { IUser } from '@/types';
-import { Users, Search, UserPlus, Eye, CreditCard, ArrowLeftRight, Loader2, X } from 'lucide-react';
+import {
+  useGetCustomersQuery,
+  useUpdateCustomerStatusMutation,
+  useGetCustomerByIdQuery,
+} from '@/store/api/apiSlice';
+import { IUser, UserRole } from '@/types';
+import {
+  Users,
+  Search,
+  UserPlus,
+  Eye,
+  CreditCard,
+  ArrowLeftRight,
+  Loader2,
+  X,
+  Check,
+  Clock,
+  ShieldAlert,
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function StaffCustomersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   const { data: customers = [], isLoading } = useGetCustomersQuery({
     search: search || undefined,
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    role: roleFilter !== 'all' ? roleFilter : undefined,
   });
+
+  const [updateStatus, { isLoading: isUpdating }] = useUpdateCustomerStatusMutation();
 
   const { data: details, isLoading: detailsLoading } = useGetCustomerByIdQuery(
     selectedCustomerId || '',
     { skip: !selectedCustomerId }
   );
 
+  const handleRoleChange = async (customerId: string, newRole: UserRole) => {
+    try {
+      await updateStatus({
+        customerId,
+        role: newRole,
+      }).unwrap();
+
+      toast.success(`User role successfully changed to ${newRole.toUpperCase()}!`);
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to update user role');
+    }
+  };
+
+  const handleApprove = async (customerId: string) => {
+    try {
+      await updateStatus({
+        customerId,
+        status: 'active',
+      }).unwrap();
+
+      toast.success('Account Approved! Customer can now perform transfers and financial operations.');
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to approve account');
+    }
+  };
+
+  const handleReject = async (customerId: string) => {
+    try {
+      await updateStatus({
+        customerId,
+        status: 'inactive',
+      }).unwrap();
+
+      toast.error('Account application has been Rejected / Deactivated.');
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to reject account');
+    }
+  };
+
+  const handleToggleBlock = async (customerId: string, currentBlocked: boolean) => {
+    try {
+      await updateStatus({
+        customerId,
+        isBlocked: !currentBlocked,
+      }).unwrap();
+
+      toast.success(`User account successfully ${!currentBlocked ? 'blocked' : 'unblocked'}!`);
+    } catch (err: any) {
+      toast.error(err?.data?.error || 'Failed to update user block status');
+    }
+  };
+
   return (
     <DashboardLayout allowedRoles={['staff']}>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Customer Directory</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Customer & User Directory</h1>
             <p className="text-xs text-slate-500">
-              Verify customer identities, view accounts, and onboard new depositors
+              Verify customer identities, approve registrations, modify user roles, and onboard depositors
             </p>
           </div>
 
@@ -41,9 +116,9 @@ export default function StaffCustomersPage() {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm max-w-md">
-          <div className="relative">
+        {/* Search & Filters */}
+        <div className="p-4 bg-white rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:w-80">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -53,6 +128,30 @@ export default function StaffCustomersPage() {
               className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none"
+            >
+              <option value="all">All Roles</option>
+              <option value="customer">Customers</option>
+              <option value="staff">Bank Staff</option>
+              <option value="admin">Administrators</option>
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none"
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending Approval</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive / Rejected</option>
+            </select>
+          </div>
         </div>
 
         {/* Customer Table */}
@@ -61,13 +160,13 @@ export default function StaffCustomersPage() {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-100">
                 <tr>
-                  <th className="py-3 px-4">Name</th>
-                  <th className="py-3 px-4">Email</th>
-                  <th className="py-3 px-4">Phone</th>
-                  <th className="py-3 px-4">Address</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Registered Date</th>
-                  <th className="py-3 px-4 text-right">Accounts</th>
+                  <th className="py-3 px-4">User</th>
+                  <th className="py-3 px-4">Role (Changeable)</th>
+                  <th className="py-3 px-4">Contact</th>
+                  <th className="py-3 px-4">Account Standing</th>
+                  <th className="py-3 px-4">Approval Actions</th>
+                  <th className="py-3 px-4">Security</th>
+                  <th className="py-3 px-4 text-right">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -81,39 +180,124 @@ export default function StaffCustomersPage() {
                 ) : customers.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-10 text-center text-slate-400">
-                      No matching customers found.
+                      No matching users found.
                     </td>
                   </tr>
                 ) : (
                   customers.map((c) => (
                     <tr key={c._id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4 font-semibold text-slate-800">{c.name}</td>
-                      <td className="py-3 px-4 text-slate-600">{c.email}</td>
-                      <td className="py-3 px-4 text-slate-600">{c.phone || '—'}</td>
-                      <td className="py-3 px-4 text-slate-500 truncate max-w-xs">
-                        {c.address || '—'}
-                      </td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-0.5 text-[10px] font-semibold rounded-full uppercase ${
-                            c.isBlocked
-                              ? 'bg-rose-100 text-rose-800'
-                              : c.status === 'active'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
+                        <p className="font-semibold text-slate-800">{c.name}</p>
+                        <p className="text-[11px] text-slate-400">{c.email}</p>
+                      </td>
+
+                      {/* Interactive Role Selector Dropdown */}
+                      <td className="py-3 px-4">
+                        <select
+                          value={c.role}
+                          onChange={(e) => handleRoleChange(c._id, e.target.value as UserRole)}
+                          className={`px-2.5 py-1 text-xs font-bold rounded-lg border focus:outline-none transition-colors cursor-pointer ${
+                            c.role === 'admin'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                              : c.role === 'staff'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                              : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
                           }`}
                         >
-                          {c.isBlocked ? 'Blocked' : c.status}
-                        </span>
+                          <option value="customer">Customer</option>
+                          <option value="staff">Bank Staff</option>
+                          <option value="admin">System Admin</option>
+                        </select>
                       </td>
-                      <td className="py-3 px-4 text-slate-500">
-                        {new Date(c.createdAt).toLocaleDateString()}
+
+                      <td className="py-3 px-4 text-slate-600">
+                        <p>{c.phone || '—'}</p>
+                        <p className="text-[11px] text-slate-400 truncate max-w-[140px]">{c.address || '—'}</p>
                       </td>
+
+                      {/* Standing Status Badge */}
+                      <td className="py-3 px-4">
+                        {c.status === 'pending' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase bg-amber-100 text-amber-800 border border-amber-200 animate-pulse">
+                            <Clock className="w-3 h-3" />
+                            Pending Approval
+                          </span>
+                        ) : c.status === 'active' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <Check className="w-3 h-3" />
+                            Active / Approved
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase bg-slate-100 text-slate-700 border border-slate-200">
+                            <X className="w-3 h-3" />
+                            {c.status}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Approval Actions */}
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1.5">
+                          {c.status === 'pending' ? (
+                            <>
+                              <button
+                                onClick={() => handleApprove(c._id)}
+                                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm flex items-center gap-1 transition-colors"
+                                title="Approve Customer Account for Full Banking Operations"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                <span>Approve</span>
+                              </button>
+                              <button
+                                onClick={() => handleReject(c._id)}
+                                className="px-2 py-1 text-xs font-semibold rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-colors"
+                                title="Reject Account"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                                <span>Reject</span>
+                              </button>
+                            </>
+                          ) : c.status === 'active' ? (
+                            <button
+                              onClick={() => handleReject(c._id)}
+                              className="px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded border border-slate-200 transition-colors"
+                              title="Deactivate / Suspend Account"
+                            >
+                              Deactivate
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleApprove(c._id)}
+                              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center gap-1"
+                              title="Re-Approve & Activate Account"
+                            >
+                              <Check className="w-3 h-3" />
+                              <span>Re-Approve</span>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Blocked Status */}
+                      <td className="py-3 px-4">
+                        <button
+                          onClick={() => handleToggleBlock(c._id, c.isBlocked)}
+                          className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase transition-colors ${
+                            c.isBlocked
+                              ? 'bg-rose-100 text-rose-800 hover:bg-rose-200'
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          }`}
+                        >
+                          {c.isBlocked ? 'Blocked' : 'Clear'}
+                        </button>
+                      </td>
+
+                      {/* Action Details */}
                       <td className="py-3 px-4 text-right">
                         <button
                           onClick={() => setSelectedCustomerId(c._id)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-                          title="View Customer Bank Accounts"
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          title="Inspect Profile, Accounts & History"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -165,7 +349,13 @@ export default function StaffCustomersPage() {
                             <span className="font-semibold text-xs text-slate-800">
                               {acc.accountType}
                             </span>
-                            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-emerald-100 text-emerald-800">
+                            <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                              acc.status === 'active'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : acc.status === 'pending'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}>
                               {acc.status}
                             </span>
                           </div>

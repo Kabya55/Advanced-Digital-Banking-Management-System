@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'staff' | 'customer';
 
-export type UserStatus = 'active' | 'inactive' | 'suspended';
+export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending';
 
 export interface IUser {
   _id: string;
@@ -17,7 +17,7 @@ export interface IUser {
 }
 
 export type AccountType = 'Savings' | 'Current' | 'Business';
-export type AccountStatus = 'active' | 'frozen' | 'closed';
+export type AccountStatus = 'active' | 'frozen' | 'closed' | 'pending';
 
 export interface IBankAccount {
   _id: string;

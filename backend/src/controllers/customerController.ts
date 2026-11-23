@@ -8,9 +8,13 @@ import { AuthRequest } from '../middleware/auth.js';
 
 export const getCustomers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { search, status } = req.query;
+    const { search, status, role } = req.query;
 
-    let query: any = { role: 'customer' };
+    let query: any = {};
+
+    if (role && role !== 'all') {
+      query.role = role;
+    }
 
     if (status && status !== 'all') {
       query.status = status;
@@ -64,11 +68,12 @@ export const getCustomerById = async (req: AuthRequest, res: Response): Promise<
 
 export const updateCustomerStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { status, isBlocked } = req.body;
+    const { status, isBlocked, role } = req.body;
     const updateData: any = {};
 
     if (status) updateData.status = status;
     if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
+    if (role) updateData.role = role;
 
     const customer = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
@@ -77,6 +82,13 @@ export const updateCustomerStatus = async (req: AuthRequest, res: Response): Pro
     if (!customer) {
       res.status(404).json({ success: false, error: 'Customer not found' });
       return;
+    }
+
+    // Synchronize customer bank accounts status on approval or suspension
+    if (status === 'active') {
+      await BankAccount.updateMany({ userId: customer._id }, { status: 'active' });
+    } else if (status === 'inactive' || status === 'suspended') {
+      await BankAccount.updateMany({ userId: customer._id }, { status: 'frozen' });
     }
 
     res.json(customer);

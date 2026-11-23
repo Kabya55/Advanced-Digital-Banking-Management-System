@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type AccountType = 'Savings' | 'Current' | 'Business';
-export type AccountStatus = 'active' | 'frozen' | 'closed';
+export type AccountStatus = 'active' | 'frozen' | 'closed' | 'pending';
 
 export interface IBankAccountDocument extends Document {
   accountNumber: string;
@@ -30,8 +30,8 @@ const BankAccountSchema = new Schema<IBankAccountDocument>(
     currency: { type: String, default: 'USD' },
     status: {
       type: String,
-      enum: ['active', 'frozen', 'closed'],
-      default: 'active',
+      enum: ['active', 'frozen', 'closed', 'pending'],
+      default: 'pending',
     },
     dailyTransferLimit: { type: Number, default: 50000 },
     perTransactionLimit: { type: Number, default: 20000 },

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export type UserRole = 'admin' | 'staff' | 'customer';
-export type UserStatus = 'active' | 'inactive' | 'suspended';
+export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending';
 
 export interface IUserDocument extends Document {
   name: string;
@@ -32,8 +32,8 @@ const UserSchema = new Schema<IUserDocument>(
     address: { type: String, trim: true, default: '' },
     status: {
       type: String,
-      enum: ['active', 'inactive', 'suspended'],
-      default: 'active',
+      enum: ['active', 'inactive', 'suspended', 'pending'],
+      default: 'pending',
     },
     isBlocked: { type: Boolean, default: false },
     transactionPin: { type: String }, // Hashed 4-6 digit PIN

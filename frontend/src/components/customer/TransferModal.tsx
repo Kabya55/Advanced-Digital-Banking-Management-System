@@ -41,6 +41,16 @@ export default function TransferModal({
       return;
     }
 
+    if (selectedAccount.status === 'pending') {
+      toast.error('Your account is pending admin approval. Financial transactions are locked.');
+      return;
+    }
+
+    if (selectedAccount.status !== 'active') {
+      toast.error(`This account is ${selectedAccount.status}. Transfers are not permitted.`);
+      return;
+    }
+
     if (!receiverAccountNumber.trim()) {
       toast.error('Please enter recipient account number');
       return;
@@ -205,11 +215,31 @@ export default function TransferModal({
             </div>
 
             <div className="pt-2">
+              {selectedAccount?.status === 'pending' && (
+                <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold text-amber-900">Account Pending Approval</p>
+                    <p className="text-[11px] text-amber-700 mt-0.5">
+                      Your registration is awaiting approval by bank staff. Outgoing fund transfers are locked.
+                    </p>
+                  </div>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all"
+                disabled={selectedAccount?.status !== 'active'}
+                className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  selectedAccount?.status !== 'active'
+                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/30'
+                }`}
               >
-                <span>Continue to Authorization</span>
+                <span>
+                  {selectedAccount?.status === 'pending'
+                    ? 'Account Pending Approval (Locked)'
+                    : 'Continue to Authorization'}
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

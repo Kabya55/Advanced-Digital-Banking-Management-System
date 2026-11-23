@@ -30,8 +30,8 @@ const UserSchema = new Schema<IUserDocument>(
     address: { type: String, trim: true, default: '' },
     status: {
       type: String,
-      enum: ['active', 'inactive', 'suspended'],
-      default: 'active',
+      enum: ['active', 'inactive', 'suspended', 'pending'],
+      default: 'pending',
     },
     isBlocked: { type: Boolean, default: false },
     transactionPin: { type: String },

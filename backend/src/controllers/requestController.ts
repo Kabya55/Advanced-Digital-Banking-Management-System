@@ -60,6 +60,17 @@ export const createRequest = async (req: AuthRequest, res: Response): Promise<vo
       return;
     }
 
+    if (account.status !== 'active') {
+      res.status(400).json({
+        success: false,
+        error:
+          account.status === 'pending'
+            ? 'Account is pending approval. Deposit and withdrawal requests are locked until approved.'
+            : `Account is ${account.status}. Requests cannot be processed.`,
+      });
+      return;
+    }
+
     if (type === 'withdrawal' && account.balance < reqAmount) {
       res.status(400).json({
         success: false,

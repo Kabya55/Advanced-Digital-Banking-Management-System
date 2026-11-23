@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       role: 'customer',
       phone: phone || '',
       address: address || '',
-      status: 'active',
+      status: 'pending',
       isBlocked: false,
     });
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       accountType: 'Savings',
       balance: 1000,
       currency: 'USD',
-      status: 'active',
+      status: 'pending',
       dailyTransferLimit: 50000,
       perTransactionLimit: 20000,
     });

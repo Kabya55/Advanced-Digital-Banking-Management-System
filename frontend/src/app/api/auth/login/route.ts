@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (user.status !== 'active') {
+    if (user.status === 'suspended' || user.status === 'inactive') {
       return NextResponse.json(
         { error: `Your account is currently ${user.status}. Access is restricted.` },
         { status: 403 }

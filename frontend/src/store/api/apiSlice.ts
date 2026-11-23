@@ -7,6 +7,7 @@ import {
   IDepositWithdrawRequest,
   AdminAnalytics,
   CustomerAnalytics,
+  UserRole,
 } from '@/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
@@ -285,11 +286,12 @@ export const bankingApi = createApi({
     }),
 
     // Customers (Admin & Staff)
-    getCustomers: builder.query<IUser[], { search?: string; status?: string } | void>({
+    getCustomers: builder.query<IUser[], { search?: string; status?: string; role?: string } | void>({
       query: (params) => {
         const query = new URLSearchParams();
         if (params?.search) query.set('search', params.search);
         if (params?.status && params.status !== 'all') query.set('status', params.status);
+        if (params?.role && params.role !== 'all') query.set('role', params.role);
         return `/customers?${query.toString()}`;
       },
       providesTags: ['Customer'],
@@ -303,14 +305,14 @@ export const bankingApi = createApi({
     }),
     updateCustomerStatus: builder.mutation<
       IUser,
-      { customerId: string; status?: string; isBlocked?: boolean }
+      { customerId: string; status?: string; isBlocked?: boolean; role?: UserRole }
     >({
       query: ({ customerId, ...body }) => ({
         url: `/customers/${customerId}/status`,
         method: 'PATCH',
         body,
       }),
-      invalidatesTags: ['Customer', 'Analytics'],
+      invalidatesTags: ['Customer', 'Account', 'Analytics'],
     }),
     registerCustomerByStaff: builder.mutation<
       { customer: IUser; account: IBankAccount; tempPassword?: string },

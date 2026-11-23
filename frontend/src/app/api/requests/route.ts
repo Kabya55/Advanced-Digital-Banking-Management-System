@@ -63,6 +63,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You do not own this account' }, { status: 403 });
     }
 
+    if (account.status !== 'active') {
+      return NextResponse.json(
+        {
+          error:
+            account.status === 'pending'
+              ? 'Account is pending approval. Deposit and withdrawal requests are locked until approved.'
+              : `Account is ${account.status}. Requests cannot be processed.`,
+        },
+        { status: 400 }
+      );
+    }
+
     if (type === 'withdrawal' && account.balance < reqAmount) {
       return NextResponse.json(
         {

@@ -31,6 +31,7 @@ export const authSlice = createSlice({
       state.error = null;
       if (typeof window !== 'undefined') {
         localStorage.setItem('bank_token', action.payload.token);
+        document.cookie = `bank_auth_token=${action.payload.token}; path=/; max-age=604800; SameSite=Lax;`;
       }
     },
     updateUser: (state, action: PayloadAction<Partial<IUser>>) => {

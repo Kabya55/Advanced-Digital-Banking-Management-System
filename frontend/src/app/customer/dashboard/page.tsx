@@ -29,6 +29,7 @@ import {
   Calendar,
   AlertCircle,
   ShieldAlert,
+  Clock,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -112,6 +113,33 @@ export default function CustomerDashboard() {
             </button>
           </div>
         </div>
+
+        {/* Account Pending Approval Banner */}
+        {(user?.status === 'pending' || currentAccount?.status === 'pending') && (
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+            <div className="flex items-start sm:items-center space-x-3">
+              <div className="p-2 bg-amber-100 text-amber-800 rounded-xl">
+                <Clock className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-bold text-amber-950 flex items-center gap-2">
+                  <span>Account Pending Verification & Approval</span>
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-amber-200 text-amber-900">
+                    Awaiting Review
+                  </span>
+                </h4>
+                <p className="text-[11px] sm:text-xs text-amber-800 mt-0.5 leading-relaxed">
+                  Your registration is complete! A bank administrator or staff officer is verifying your identity. Outgoing transfers, deposits, and loan requests are locked until your account is approved.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0">
+              <span className="inline-block px-3 py-1.5 bg-amber-100 border border-amber-300 text-amber-900 text-xs font-semibold rounded-xl">
+                Transactions Locked 🔒
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* PIN Security Notice if customer has not set up PIN yet */}
         {!user?.hasPin && (

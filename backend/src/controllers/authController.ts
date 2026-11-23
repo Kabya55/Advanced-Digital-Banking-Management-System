@@ -28,7 +28,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (user.status !== 'active') {
+    if (user.status === 'suspended' || user.status === 'inactive') {
       res.status(403).json({
         success: false,
         error: `Account is ${user.status}. Access is restricted.`,
@@ -116,7 +116,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       role: 'customer',
       phone: phone || '',
       address: address || '',
-      status: 'active',
+      status: 'pending',
       isBlocked: false,
     });
 
@@ -130,7 +130,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       accountType: 'Savings',
       balance: 1000,
       currency: 'USD',
-      status: 'active',
+      status: 'pending',
       dailyTransferLimit: 50000,
       perTransactionLimit: 20000,
     });

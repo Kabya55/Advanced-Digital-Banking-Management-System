@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser, unauthorizedResponse, forbiddenResponse } from '@/lib/auth';
 import { connectToDatabase } from '@/lib/mongodb';
 import User from '@/models/User';
+import BankAccount from '@/models/BankAccount';
 
 export async function PATCH(
   req: NextRequest,
@@ -11,18 +12,19 @@ export async function PATCH(
     const authUser = await getAuthUser(req);
     if (!authUser) return unauthorizedResponse();
 
-    if (authUser.role !== 'admin') {
-      return forbiddenResponse('Only Admin can modify customer block/active status');
+    if (authUser.role !== 'admin' && authUser.role !== 'staff') {
+      return forbiddenResponse('Only Admin and Bank Staff can modify customer roles or status');
     }
 
     const { id } = await params;
-    const { status, isBlocked } = await req.json();
+    const { status, isBlocked, role } = await req.json();
 
     await connectToDatabase();
 
     const updateData: any = {};
     if (status) updateData.status = status;
     if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
+    if (role) updateData.role = role;
 
     const customer = await User.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -30,6 +32,13 @@ export async function PATCH(
 
     if (!customer) {
       return NextResponse.json({ error: 'Customer not found' }, { status: 404 });
+    }
+
+    // Synchronize customer bank accounts status on approval or suspension
+    if (status === 'active') {
+      await BankAccount.updateMany({ userId: customer._id }, { status: 'active' });
+    } else if (status === 'inactive' || status === 'suspended') {
+      await BankAccount.updateMany({ userId: customer._id }, { status: 'frozen' });
     }
 
     return NextResponse.json(customer);

@@ -41,6 +41,16 @@ export async function POST(req: NextRequest) {
     const user = await User.findById(authUser.userId);
     if (!user) return unauthorizedResponse();
 
+    if (user.status === 'pending') {
+      return NextResponse.json(
+        {
+          error:
+            'Your account is currently pending verification and approval by bank administration. All fund transfers are restricted until your account is approved.',
+        },
+        { status: 403 }
+      );
+    }
+
     if (!user.transactionPin) {
       return NextResponse.json(
         {
@@ -74,7 +84,12 @@ export async function POST(req: NextRequest) {
 
     if (senderAccount.status !== 'active') {
       return NextResponse.json(
-        { error: `Sender account is ${senderAccount.status}. Transfers are disabled.` },
+        {
+          error:
+            senderAccount.status === 'pending'
+              ? 'This bank account is pending approval by bank administration. Transfers cannot be executed until approved.'
+              : `Sender account is ${senderAccount.status}. Transfers are disabled.`,
+        },
         { status: 400 }
       );
     }

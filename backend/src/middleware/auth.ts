@@ -47,7 +47,7 @@ export const authenticate = async (
       return;
     }
 
-    if (user.status !== 'active') {
+    if (user.status === 'suspended' || user.status === 'inactive') {
       res.status(403).json({ success: false, error: `Account is ${user.status}. Access denied.` });
       return;
     }

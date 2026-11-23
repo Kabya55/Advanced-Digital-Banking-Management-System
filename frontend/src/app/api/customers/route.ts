@@ -17,8 +17,13 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search');
     const status = searchParams.get('status');
+    const role = searchParams.get('role');
 
-    let query: any = { role: 'customer' };
+    let query: any = {};
+
+    if (role && role !== 'all') {
+      query.role = role;
+    }
 
     if (status && status !== 'all') {
       query.status = status;

@@ -162,6 +162,14 @@ export const transferFund = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
+    if (user.status === 'pending') {
+      res.status(403).json({
+        success: false,
+        error: 'Your account is pending verification and approval by bank administration. All transfers are restricted until approved.',
+      });
+      return;
+    }
+
     if (!user.transactionPin) {
       res.status(400).json({
         success: false,
@@ -194,7 +202,10 @@ export const transferFund = async (req: AuthRequest, res: Response): Promise<voi
     if (senderAccount.status !== 'active') {
       res.status(400).json({
         success: false,
-        error: `Sender account is ${senderAccount.status}. Transfers are disabled.`,
+        error:
+          senderAccount.status === 'pending'
+            ? 'This bank account is pending approval by bank administration. Transfers cannot be executed until approved.'
+            : `Sender account is ${senderAccount.status}. Transfers are disabled.`,
       });
       return;
     }

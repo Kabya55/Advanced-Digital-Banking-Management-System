@@ -28,8 +28,8 @@ const BankAccountSchema = new Schema<IBankAccountDocument>(
     currency: { type: String, default: 'USD' },
     status: {
       type: String,
-      enum: ['active', 'frozen', 'closed'],
-      default: 'active',
+      enum: ['active', 'frozen', 'closed', 'pending'],
+      default: 'pending',
     },
     dailyTransferLimit: { type: Number, default: 50000 },
     perTransactionLimit: { type: Number, default: 20000 },

@@ -100,6 +100,14 @@ export const applyLoan = async (req: AuthRequest, res: Response): Promise<void> 
       return;
     }
 
+    if (account.status !== 'active') {
+      res.status(403).json({
+        success: false,
+        error: 'Cannot apply for a loan. Your account is pending verification or inactive.',
+      });
+      return;
+    }
+
     const interestRate = 8.5; // 8.5% annual rate
     const monthlyRate = interestRate / 100 / 12;
     // Standard amortization formula: M = P * (r*(1+r)^n) / ((1+r)^n - 1)
