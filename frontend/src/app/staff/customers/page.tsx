@@ -44,19 +44,6 @@ export default function StaffCustomersPage() {
     { skip: !selectedCustomerId }
   );
 
-  const handleRoleChange = async (customerId: string, newRole: UserRole) => {
-    try {
-      await updateStatus({
-        customerId,
-        role: newRole,
-      }).unwrap();
-
-      toast.success(`User role successfully changed to ${newRole.toUpperCase()}!`);
-    } catch (err: any) {
-      toast.error(err?.data?.error || 'Failed to update user role');
-    }
-  };
-
   const handleApprove = async (customerId: string) => {
     try {
       await updateStatus({
@@ -103,7 +90,7 @@ export default function StaffCustomersPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">Customer & User Directory</h1>
             <p className="text-xs text-slate-500">
-              Verify customer identities, approve registrations, modify user roles, and onboard depositors
+              Verify customer identities, approve registrations, and onboard depositors
             </p>
           </div>
 
@@ -161,7 +148,7 @@ export default function StaffCustomersPage() {
               <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-100">
                 <tr>
                   <th className="py-3 px-4">User</th>
-                  <th className="py-3 px-4">Role (Changeable)</th>
+                  <th className="py-3 px-4">Role</th>
                   <th className="py-3 px-4">Contact</th>
                   <th className="py-3 px-4">Account Standing</th>
                   <th className="py-3 px-4">Approval Actions</th>
@@ -191,23 +178,19 @@ export default function StaffCustomersPage() {
                         <p className="text-[11px] text-slate-400">{c.email}</p>
                       </td>
 
-                      {/* Interactive Role Selector Dropdown */}
+                      {/* Read-Only Role Badge (Role can only be changed by Admin) */}
                       <td className="py-3 px-4">
-                        <select
-                          value={c.role}
-                          onChange={(e) => handleRoleChange(c._id, e.target.value as UserRole)}
-                          className={`px-2.5 py-1 text-xs font-bold rounded-lg border focus:outline-none transition-colors cursor-pointer ${
+                        <span
+                          className={`inline-block px-2.5 py-1 text-xs font-semibold rounded-lg border uppercase tracking-wider ${
                             c.role === 'admin'
-                              ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
                               : c.role === 'staff'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                              : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-indigo-50 text-indigo-700 border-indigo-200'
                           }`}
                         >
-                          <option value="customer">Customer</option>
-                          <option value="staff">Bank Staff</option>
-                          <option value="admin">System Admin</option>
-                        </select>
+                          {c.role === 'admin' ? 'Administrator' : c.role === 'staff' ? 'Staff' : 'Customer'}
+                        </span>
                       </td>
 
                       <td className="py-3 px-4 text-slate-600">

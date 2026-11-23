@@ -69,6 +69,12 @@ export const getCustomerById = async (req: AuthRequest, res: Response): Promise<
 export const updateCustomerStatus = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { status, isBlocked, role } = req.body;
+
+    if (role && req.user?.role !== 'admin') {
+      res.status(403).json({ success: false, error: 'Only administrators can change user roles' });
+      return;
+    }
+
     const updateData: any = {};
 
     if (status) updateData.status = status;

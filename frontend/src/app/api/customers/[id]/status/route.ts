@@ -19,6 +19,10 @@ export async function PATCH(
     const { id } = await params;
     const { status, isBlocked, role } = await req.json();
 
+    if (role && authUser.role !== 'admin') {
+      return forbiddenResponse('Only administrators can change user roles');
+    }
+
     await connectToDatabase();
 
     const updateData: any = {};
